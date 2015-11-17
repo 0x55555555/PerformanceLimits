@@ -30,7 +30,7 @@ public:
   {
     std::string unit = "";
   };
-  
+
   struct Result
   {
     TestParameters parameters;
@@ -49,7 +49,7 @@ public:
   {
     TestParameters p;
 
-    const std::chrono::milliseconds minimum(100);
+    const std::chrono::milliseconds minimum(200);
 
     p.count = 1;
     do {
@@ -81,6 +81,7 @@ public:
     }
 
     m_results.push_back(result);
+    dump(result);
   }
 
   virtual void callback_impl() = 0;
@@ -105,6 +106,30 @@ public:
   }
 
   const Result &final_result() { return m_results.back(); }
+
+  void dump(const Result &r)
+  {
+    double value = r.parameters.count;
+    double time = r.time.count();
+    auto time_unit = "ns";
+    if (time > 1000000000) {
+      time_unit = "s";
+      time /= 1e9;
+    }
+    if (time > 1000000) {
+      time_unit = "us";
+      time /= 1e6;
+    }
+    if (time > 1000) {
+      time_unit = "ms";
+      time /= 1e3;
+    }
+
+    auto rate = value / time;
+
+    std::cout << "  Captured result with time " << time << time_unit <<
+      " rate " << rate << " " << setup().unit << "/" << time_unit << std::endl;
+  }
 
 private:
   std::string m_name;
@@ -145,28 +170,7 @@ public:
         all_success = false;
       }
 
-      double value = t->final_result().parameters.count;
-      double time = t->final_result().time.count();
-      auto time_unit = "ns";
-      if (time > 1000000000) {
-        time_unit = "s";
-        time /= 1e9;
-      }
-      if (time > 1000000) {
-        time_unit = "us";
-        time /= 1e6;
-      }
-      if (time > 1000) {
-        time_unit = "ms";
-        time /= 1e3;
-      }
-
-      auto rate = value / time;
-
-      std::cout << "  Captured result with time " << time << time_unit << "\n" <<
-      "    rate " << rate << " " << t->setup().unit << "/" << time_unit << std::endl;;
-
-      std::cout << "  ... complete" << std::endl;
+      t->dump(t->final_result());
     }
 
     std::cout << "... all tests complete" << std::endl;
