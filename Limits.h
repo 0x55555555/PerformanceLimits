@@ -7,6 +7,16 @@
 namespace limits
 {
   
+struct TestParameters
+{
+  std::size_t size;
+};
+  
+inline std::ostream &operator<<(std::ostream &str, const TestParameters &p)
+{
+  return str << "{ " << p.size << " }";
+}
+  
 class TestBase
 {
 public:
@@ -15,14 +25,9 @@ public:
     Sized
   };
   
-  struct Parameters
-  {
-    std::size_t size;
-  };
-  
   struct Setup
   {
-    std::string unit;
+    std::string unit = "";
   };
   
   TestBase(const char *name, Type t)
@@ -36,28 +41,91 @@ public:
   void callback()
   {
     if (m_type == Sized) {
-      m_parameters.size = 1;
+      TestParameters p;
+      
+      p.size = 1;
+      capture_result(p);
+      
+      p.size = 10;
+      capture_result(p);
+      
+      p.size = 100;
+      capture_result(p);
+      
+      p.size = 100;
+      capture_result(p);
+      
+      p.size = 1000;
+      capture_result(p);
+      
+      p.size = 1000;
+      capture_result(p);
+    }
+  }
+  
+  void capture_result(const TestParameters &p)
+  {
+    Result result;
+    result.parameters = p;
+    m_current_result = &result;
+  
+    try
+    {
+      callback_impl();
+    }
+    catch(...)
+    {
+      m_current_result = nullptr;
+      throw;
     }
   
-    callback_impl();
+    m_results.push_back(result);
+  
+  
+    double value = result.parameters.size;
+    double time = result.time.count();
+    time /= 1e9;
+  
+    auto rate = value / time;
+  
+    std::cout << "Captured result " << p << "\n" <<
+      "  with time " << result.time.count() << "ns\n" <<
+      "  rate " << rate << " " << m_setup.unit << "/s" << std::endl;;
   }
   
   virtual void callback_impl() = 0;
   
-  template <typename T> void run(const Setup &s, const T &t)
+  template <typename T> void run(const T &t)
   {
+    auto begin = std::chrono::high_resolution_clock::now();
+    t();
+    auto end = std::chrono::high_resolution_clock::now();
+  
+    m_current_result->time = end - begin;
   }
   
-  const Parameters &parameters()
+  const TestParameters &parameters()
   {
-    return m_parameters;
+    return m_current_result->parameters;
+  }
+  
+  Setup &setup()
+  {
+    return m_setup;
   }
   
 private:
   std::string m_name;
   Type m_type;
+  Setup m_setup;
   
-  Parameters m_parameters;
+  struct Result
+  {
+    TestParameters parameters;
+    std::chrono::nanoseconds time;
+  };
+  std::vector<Result> m_results;
+  Result *m_current_result;
 };
   
 class Tests
