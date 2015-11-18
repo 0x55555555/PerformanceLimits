@@ -88,9 +88,11 @@ public:
 
   template <typename T> void run(const T &t)
   {
+    std::cout << "start" << std::endl;
     auto begin = std::chrono::high_resolution_clock::now();
     t();
     auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "end" << std::endl;
 
     m_current_result->time = end - begin;
   }
@@ -127,7 +129,7 @@ public:
 
     auto rate = value / time;
 
-    std::cout << "  Captured result with time " << time << time_unit <<
+    std::cout << "  Captured result " << r.parameters << " with time " << time << time_unit <<
       " rate " << rate << " " << setup().unit << "/" << time_unit << std::endl;
   }
 
