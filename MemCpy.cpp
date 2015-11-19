@@ -16,7 +16,6 @@ LIMITS_TEST(memcpy, Sized) {
   std::size_t size = a.size() * sizeof(*a.data());
   
   run([&]() {
-    std::cout << a.size() * sizeof(a.front()) << std::endl;
     memcpy(b.data(), a.data(), size);
   });
 }

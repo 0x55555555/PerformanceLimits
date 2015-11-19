@@ -49,7 +49,7 @@ public:
   {
     TestParameters p;
 
-    const std::chrono::milliseconds minimum(200);
+    const std::chrono::milliseconds minimum(100);
 
     p.count = 1;
     do {
@@ -81,19 +81,16 @@ public:
     }
 
     m_results.push_back(result);
-    dump(result);
   }
 
   virtual void callback_impl() = 0;
 
   template <typename T> void run(const T &t)
   {
-    std::cout << "start" << std::endl;
     auto begin = std::chrono::high_resolution_clock::now();
     t();
     auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "end" << std::endl;
-
+  
     m_current_result->time = end - begin;
   }
 
