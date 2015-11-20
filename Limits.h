@@ -116,11 +116,11 @@ public:
       time /= 1e9;
     }
     if (time > 1000000) {
-      time_unit = "us";
+      time_unit = "ms";
       time /= 1e6;
     }
     if (time > 1000) {
-      time_unit = "ms";
+      time_unit = "us";
       time /= 1e3;
     }
 

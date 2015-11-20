@@ -20,6 +20,23 @@ LIMITS_TEST(memcpy, Sized) {
   });
 }
 
+LIMITS_TEST(memmove, Sized) {
+  
+  auto p = parameters();
+  setup().unit = "MB";
+  
+  using Megabyte = std::array<char, 1000 * 1000>;
+  
+  std::vector<Megabyte> a(p.count);
+  std::vector<Megabyte> b(p.count);
+  
+  std::size_t size = a.size() * sizeof(*a.data());
+  
+  run([&]() {
+    memmove(b.data(), a.data(), size);
+  });
+}
+
 LIMITS_TEST(memcpy_threaded_2, Sized) {
   
   auto p = parameters();
