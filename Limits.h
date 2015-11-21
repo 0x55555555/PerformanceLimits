@@ -103,8 +103,9 @@ public:
   {
     return m_setup;
   }
-
+  
   const Result &final_result() { return m_results.back(); }
+  const std::vector<Result> &results() { return m_results; }
 
   void dump(const Result &r)
   {
@@ -169,7 +170,18 @@ public:
         all_success = false;
       }
 
-      t->dump(t->final_result());
+      //t->dump(t->final_result());
+    
+      TestBase::Result aggregated;
+      for (auto &r : t->results())
+        {
+        aggregated.time += r.time;
+        aggregated.parameters.count += r.parameters.count;
+      }
+    aggregated.time = aggregated.time / t->results().size();
+    aggregated.parameters.count = aggregated.parameters.count / t->results().size();
+    
+    t->dump(aggregated);
     }
 
     std::cout << "... all tests complete" << std::endl;
