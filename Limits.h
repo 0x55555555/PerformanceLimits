@@ -9,7 +9,7 @@ namespace limits
 
 struct TestParameters
 {
-  std::size_t count;
+  std::size_t count = 0;
 };
 
 inline std::ostream &operator<<(std::ostream &str, const TestParameters &p)
@@ -29,6 +29,7 @@ public:
   struct Setup
   {
     std::string unit = "";
+    std::size_t maximum_count = 1000;
   };
 
   struct Result
@@ -55,7 +56,7 @@ public:
     do {
       capture_result(p);
       p.count *= 10;
-    } while(m_results.back().time < minimum);
+    } while(m_results.back().time < minimum && p.count <= m_setup.maximum_count);
   }
 
   void capture_result(const TestParameters &p)
@@ -98,8 +99,13 @@ public:
   {
     return m_current_result->parameters;
   }
-
+  
   Setup &setup()
+  {
+  return m_setup;
+  }
+  
+  const Setup &setup() const
   {
     return m_setup;
   }
@@ -107,28 +113,53 @@ public:
   const Result &final_result() { return m_results.back(); }
   const std::vector<Result> &results() { return m_results; }
 
-  void dump(const Result &r)
+  template <typename T, typename U>
+  static double convert(const U &time)
+  {
+    double from = double(U::period::num) / double(U::period::den);
+    double to = double(T::period::num) / double(T::period::den);
+    return double(time.count()) * (from / to);
+  }
+  
+  static double format_time(const std::chrono::nanoseconds &time, std::string &time_unit)
+  {
+    if (time > std::chrono::seconds(1)) {
+      time_unit = "s";
+      return convert<std::chrono::seconds>(time);
+    }
+  
+    if (time > std::chrono::milliseconds(1)) {
+      time_unit = "ms";
+      return convert<std::chrono::milliseconds>(time);
+    }
+  
+    if (time > std::chrono::microseconds(1)) {
+      time_unit = "us";
+      return convert<std::chrono::microseconds>(time);
+    }
+  
+    time_unit = "ns";
+    return time.count();
+  }
+  
+  std::string rate(const Result &r) const
   {
     double value = r.parameters.count;
-    double time = r.time.count();
-    auto time_unit = "ns";
-    if (time > 1000000000) {
-      time_unit = "s";
-      time /= 1e9;
-    }
-    if (time > 1000000) {
-      time_unit = "ms";
-      time /= 1e6;
-    }
-    if (time > 1000) {
-      time_unit = "us";
-      time /= 1e3;
-    }
-
+    std::string time_unit;
+    double time = format_time(r.time, time_unit);
+  
     auto rate = value / time;
+  
+    return std::to_string(rate) + " " + setup().unit + "/" + time_unit;
+  }
 
+  
+  void dump(const Result &r)
+  {
+    std::string time_unit;
+    double time = format_time(r.time, time_unit);
     std::cout << "  Captured result " << r.parameters << " with time " << time << time_unit <<
-      " rate " << rate << " " << setup().unit << "/" << time_unit << std::endl;
+      " rate " << rate(r) << std::endl;
   }
 
 private:
@@ -159,7 +190,9 @@ public:
 
     for (auto &t : m_tests)
     {
-      std::cout << "  Running test " << t->name() << std::endl;
+      std::cout << "  " << t->name() << ":\t";
+      std::cout.flush();
+    
       try
       {
         t->callback();
@@ -168,20 +201,18 @@ public:
       {
         std::cerr << "    ... failed in test" << std::endl;
         all_success = false;
+        continue;
       }
-
-      //t->dump(t->final_result());
     
-      TestBase::Result aggregated;
+      TestBase::Result aggregated{};
       for (auto &r : t->results())
         {
         aggregated.time += r.time;
         aggregated.parameters.count += r.parameters.count;
       }
-    aggregated.time = aggregated.time / t->results().size();
-    aggregated.parameters.count = aggregated.parameters.count / t->results().size();
+      aggregated.time = aggregated.time / t->results().size();
     
-    t->dump(aggregated);
+      std::cout << " total count " << aggregated.parameters.count << " over " << t->results().size() << " iterations, at rate " << t->rate(aggregated) << std::endl;
     }
 
     std::cout << "... all tests complete" << std::endl;
