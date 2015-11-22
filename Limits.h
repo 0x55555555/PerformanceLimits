@@ -44,6 +44,16 @@ public:
   {
   }
 
+  void prevent_optimisation(const void *, std::size_t i);
+  template <typename T> void prevent_optimisation(const T &t)
+  {
+    prevent_optimisation(&t, sizeof(t));
+  }
+  template <typename T> void prevent_optimisation(const std::vector<T> &t)
+  {
+    prevent_optimisation(t.data(), sizeof(t) * t.size());
+  }
+  
   const std::string &name() const { return m_name; }
 
   void callback()
@@ -54,7 +64,10 @@ public:
 
     p.count = 1;
     do {
-      capture_result(p);
+      for (std::size_t i = 0; i < 10; ++i) {
+        capture_result(p);
+      }
+      
       p.count *= 10;
     } while(m_results.back().time < minimum && p.count <= m_setup.maximum_count);
   }

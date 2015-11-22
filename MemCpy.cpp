@@ -55,6 +55,8 @@ LIMITS_TEST(memcpy_threaded_2, Sized) {
     
     fut_a.get();
     fut_b.get();
+    
+    prevent_optimisation(b);
   });
 }
 
@@ -80,6 +82,8 @@ LIMITS_TEST(memcpy_threaded_4, Sized) {
     fut_b.get();
     fut_c.get();
     fut_d.get();
+    
+    prevent_optimisation(b);
   });
 }
 
@@ -96,6 +100,39 @@ LIMITS_TEST(multiply, Count) {
     for (std::size_t i = 0; i < a.size(); ++i) {
       c[i] = a[i] * b[i];
     }
+    prevent_optimisation(c);
+  });
+}
+
+LIMITS_TEST(square, Count) {
+  
+  auto p = parameters();
+  setup().unit = "operation";
+  
+  std::vector<int> a(p.count);
+  std::vector<int> b(p.count);
+  
+  run([&]() {
+    for (std::size_t i = 0; i < a.size(); ++i) {
+      b[i] = a[i] * a[i];
+    }
+    prevent_optimisation(b);
+  });
+}
+
+LIMITS_TEST(assign, Count) {
+  
+  auto p = parameters();
+  setup().unit = "operation";
+  
+  std::vector<int> a(p.count);
+  std::vector<int> b(p.count);
+  
+  run([&]() {
+    for (std::size_t i = 0; i < a.size(); ++i) {
+      b[i] = a[i];
+    }
+    prevent_optimisation(b);
   });
 }
 
@@ -119,6 +156,8 @@ LIMITS_TEST(complex, Count) {
       d1[i] = (-b_ + (b_ * b_ - 4 * a_ * c_)) / 2 * a_;
       d2[i] = (-b_ - (b_ * b_ - 4 * a_ * c_)) / 2 * a_;
     }
+    prevent_optimisation(d1);
+    prevent_optimisation(d2);
   });
 }
 
@@ -134,6 +173,7 @@ LIMITS_TEST(sqrt, Count) {
     for (std::size_t i = 0; i < a.size(); ++i) {
       b[i] = sqrt(a[i]);
     }
+    prevent_optimisation(b);
   });
 }
 
@@ -157,6 +197,8 @@ LIMITS_TEST(quadratic, Count) {
       d1[i] = (-b_ + sqrt(b_ * b_ - 4 * a_ * c_)) / 2 * a_;
       d2[i] = (-b_ - sqrt(b_ * b_ - 4 * a_ * c_)) / 2 * a_;
     }
+    prevent_optimisation(d1);
+    prevent_optimisation(d2);
   });
 }
 
