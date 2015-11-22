@@ -218,14 +218,16 @@ public:
       }
     
       TestBase::Result aggregated{};
+      std::size_t total_count = 0;
       for (auto &r : t->results())
         {
         aggregated.time += r.time;
-        aggregated.parameters.count += r.parameters.count;
+        total_count += r.parameters.count;
       }
       aggregated.time = aggregated.time / t->results().size();
+      aggregated.parameters.count = total_count / t->results().size();
     
-      std::cout << " total count " << aggregated.parameters.count << " over " << t->results().size() << " iterations, at rate " << t->rate(aggregated) << std::endl;
+      std::cout << " total count " << total_count << " over " << t->results().size() << " iterations, at rate " << t->rate(aggregated) << std::endl;
     }
 
     std::cout << "... all tests complete" << std::endl;
