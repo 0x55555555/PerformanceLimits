@@ -136,6 +136,22 @@ LIMITS_TEST(assign, Count) {
   });
 }
 
+LIMITS_TEST(sqrt, Count) {
+  
+  auto p = parameters();
+  setup().unit = "operation";
+  
+  std::vector<int> a(p.count);
+  std::vector<int> b(p.count);
+  
+  run([&]() {
+    for (std::size_t i = 0; i < a.size(); ++i) {
+      b[i] = sqrt(a[i]);
+    }
+    prevent_optimisation(b);
+  });
+}
+
 LIMITS_TEST(complex, Count) {
   
   auto p = parameters();
@@ -161,22 +177,6 @@ LIMITS_TEST(complex, Count) {
   });
 }
 
-LIMITS_TEST(sqrt, Count) {
-  
-  auto p = parameters();
-  setup().unit = "operation";
-  
-  std::vector<int> a(p.count);
-  std::vector<int> b(p.count);
-  
-  run([&]() {
-    for (std::size_t i = 0; i < a.size(); ++i) {
-      b[i] = sqrt(a[i]);
-    }
-    prevent_optimisation(b);
-  });
-}
-
 LIMITS_TEST(quadratic, Count) {
   
   auto p = parameters();
@@ -197,6 +197,46 @@ LIMITS_TEST(quadratic, Count) {
       d1[i] = (-b_ + sqrt(b_ * b_ - 4 * a_ * c_)) / 2 * a_;
       d2[i] = (-b_ - sqrt(b_ * b_ - 4 * a_ * c_)) / 2 * a_;
     }
+    prevent_optimisation(d1);
+    prevent_optimisation(d2);
+  });
+}
+
+LIMITS_TEST(quadratic_threaded_8, Count) {
+  
+  auto p = parameters();
+  setup().unit = "operation";
+  
+  std::vector<int> a(p.count);
+  std::vector<int> b(p.count);
+  std::vector<int> c(p.count);
+  std::vector<int> d1(p.count);
+  std::vector<int> d2(p.count);
+  
+  auto solve = [&](std::size_t start, std::size_t length) {
+    for (std::size_t i = start; i < length; ++i) {
+      auto a_ = a[i];
+      auto b_ = b[i];
+      auto c_ = c[i];
+      
+      d1[i] = (-b_ + sqrt(b_ * b_ - 4 * a_ * c_)) / 2 * a_;
+      d2[i] = (-b_ - sqrt(b_ * b_ - 4 * a_ * c_)) / 2 * a_;
+    }
+  };
+  
+  run([&]() {
+    std::size_t section = a.size() / 8;
+    auto fut_1 = std::async(std::launch::async, [&]() { solve(section*0, section); });
+    auto fut_2 = std::async(std::launch::async, [&]() { solve(section*1, section); });
+    auto fut_3 = std::async(std::launch::async, [&]() { solve(section*2, section); });
+    auto fut_4 = std::async(std::launch::async, [&]() { solve(section*3, section); });
+    auto fut_5 = std::async(std::launch::async, [&]() { solve(section*4, section); });
+    auto fut_6 = std::async(std::launch::async, [&]() { solve(section*5, section); });
+    auto fut_7 = std::async(std::launch::async, [&]() { solve(section*6, section); });
+    auto fut_8 = std::async(std::launch::async, [&]() { solve(section*7, section); });
+    
+    fut_1.get(); fut_2.get(); fut_3.get(); fut_4.get(); fut_5.get(); fut_6.get(); fut_7.get(); fut_8.get();
+    
     prevent_optimisation(d1);
     prevent_optimisation(d2);
   });

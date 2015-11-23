@@ -167,11 +167,11 @@ public:
   }
 
   
-  void dump(const Result &r)
+  void dump(std::ostream &output, const Result &r)
   {
     std::string time_unit;
     double time = format_time(r.time, time_unit);
-    std::cout << "  Captured result " << r.parameters << " with time " << time << time_unit <<
+    output << "  Captured result " << r.parameters << " with time " << time << time_unit <<
       " rate " << rate(r) << std::endl;
   }
 
@@ -191,20 +191,18 @@ public:
   {
   }
 
-  static void install(TestBase *t)
+  static void install(TestBase *t);
+  static const std::vector<TestBase *> &tests();
+  
+  int run(std::ostream &output)
   {
-    m_tests.push_back(t);
-  }
-
-  int run()
-  {
-    std::cout << "Running all tests" << std::endl;
+    output << "Running all tests" << std::endl;
     bool all_success = true;
 
-    for (auto &t : m_tests)
+    for (auto &t : tests())
     {
-      std::cout << "  " << t->name() << ":\t";
-      std::cout.flush();
+      output << "  " << t->name() << ":\t";
+      output.flush();
     
       try
       {
@@ -212,7 +210,7 @@ public:
       }
       catch(...)
       {
-        std::cerr << "    ... failed in test" << std::endl;
+        output << "    ... failed in test" << std::endl;
         all_success = false;
         continue;
       }
@@ -227,14 +225,12 @@ public:
       aggregated.time = aggregated.time / t->results().size();
       aggregated.parameters.count = total_count / t->results().size();
     
-      std::cout << " total count " << total_count << " over " << t->results().size() << " iterations, at rate " << t->rate(aggregated) << std::endl;
+      output << " total count " << total_count << " over " << t->results().size() << " iterations, at rate " << t->rate(aggregated) << std::endl;
     }
 
-    std::cout << "... all tests complete" << std::endl;
+    output << "... all tests complete" << std::endl;
     return all_success ? 0 : 1;
   }
-
-  static std::vector<TestBase *> m_tests;
 };
 
 }
@@ -252,4 +248,4 @@ public:
   LIMITS_TEST_NAME LIMITS_JOIN(g_, LIMITS_TEST_NAME); \
   void LIMITS_TEST_NAME::callback_impl()
 
-#define LIMITS_APP() int main(int argc, char **argv) { limits::Tests tests(argc, argv); return tests.run(); }
+#define LIMITS_APP() int main(int argc, char **argv) { limits::Tests tests(argc, argv); return tests.run(std::cout); }
