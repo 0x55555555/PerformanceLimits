@@ -3,12 +3,40 @@
 #include <cmath>
 #include <future>
 
-LIMITS_TEST(memcpy, Sized) {
+using Megabyte = std::array<char, 1000 * 1000>;
+
+LIMITS_TEST(memfill, Sized) {
   
   auto p = parameters();
   setup().unit = "MB";
   
-  using Megabyte = std::array<char, 1000 * 1000>;
+  std::size_t size = (sizeof(Megabyte) * p.count) / sizeof(std::int32_t);
+  
+  std::vector<std::int32_t> a(size);
+  
+  run([&]() {
+    std::fill(a.begin(), a.end(), 55);
+  });
+}
+
+LIMITS_TEST(memset, Sized) {
+  
+  auto p = parameters();
+  setup().unit = "MB";
+  
+  std::size_t size = (sizeof(Megabyte) * p.count) / sizeof(std::int32_t);
+  
+  std::vector<std::int32_t> a(size);
+  
+  run([&]() {
+    memset(a.data(), 55, a.size() * sizeof(a[0]));
+  });
+}
+
+LIMITS_TEST(memcpy, Sized) {
+  
+  auto p = parameters();
+  setup().unit = "MB";
   
   std::vector<Megabyte> a(p.count);
   std::vector<Megabyte> b(p.count);
@@ -25,8 +53,6 @@ LIMITS_TEST(memmove, Sized) {
   auto p = parameters();
   setup().unit = "MB";
   
-  using Megabyte = std::array<char, 1000 * 1000>;
-  
   std::vector<Megabyte> a(p.count);
   std::vector<Megabyte> b(p.count);
   
@@ -41,8 +67,6 @@ LIMITS_TEST(memcpy_threaded_2, Sized) {
   
   auto p = parameters();
   setup().unit = "MB";
-  
-  using Megabyte = std::array<char, 1000 * 1000>;
   
   std::vector<Megabyte> a(p.count);
   std::vector<Megabyte> b(p.count);
@@ -64,8 +88,6 @@ LIMITS_TEST(memcpy_threaded_4, Sized) {
   
   auto p = parameters();
   setup().unit = "MB";
-  
-  using Megabyte = std::array<char, 1000 * 1000>;
   
   std::vector<Megabyte> a(p.count);
   std::vector<Megabyte> b(p.count);
