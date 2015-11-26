@@ -264,4 +264,35 @@ LIMITS_TEST(quadratic_threaded_8, Count) {
   });
 }
 
+LIMITS_TEST(vector_find, Count) {
+  
+  auto p = parameters();
+  setup().unit = "operation";
+  
+  std::vector<int> a(p.count);
+  std::fill(a.begin(), a.end(), 0);
+  a.back() = 1;
+  
+  run([&]() {
+    auto found = std::find(a.begin(), a.end(), 1);
+    prevent_optimisation(found);
+  });
+}
+
+LIMITS_TEST(vector_binary_search, Count) {
+  
+  auto p = parameters();
+  setup().unit = "operation";
+  
+  std::vector<int> a(p.count);
+  std::fill(a.begin(), a.end(), 0);
+  a.back() = 1;
+  
+  run([&]() {
+    auto found = std::binary_search(a.begin(), a.end(), 1);
+    prevent_optimisation(found);
+  });
+}
+
+
 LIMITS_APP()
