@@ -247,17 +247,17 @@ LIMITS_TEST(quadratic_threaded_8, Count) {
   };
   
   run([&]() {
-    std::size_t section = a.size() / 8;
+    std::size_t section = a.size() / 2;
     auto fut_1 = std::async(std::launch::async, [&]() { solve(section*0, section); });
     auto fut_2 = std::async(std::launch::async, [&]() { solve(section*1, section); });
-    auto fut_3 = std::async(std::launch::async, [&]() { solve(section*2, section); });
+    /*auto fut_3 = std::async(std::launch::async, [&]() { solve(section*2, section); });
     auto fut_4 = std::async(std::launch::async, [&]() { solve(section*3, section); });
     auto fut_5 = std::async(std::launch::async, [&]() { solve(section*4, section); });
     auto fut_6 = std::async(std::launch::async, [&]() { solve(section*5, section); });
     auto fut_7 = std::async(std::launch::async, [&]() { solve(section*6, section); });
-    auto fut_8 = std::async(std::launch::async, [&]() { solve(section*7, section); });
+    auto fut_8 = std::async(std::launch::async, [&]() { solve(section*7, section); });*/
     
-    fut_1.get(); fut_2.get(); fut_3.get(); fut_4.get(); fut_5.get(); fut_6.get(); fut_7.get(); fut_8.get();
+    fut_1.get(); fut_2.get();// fut_3.get(); fut_4.get(); fut_5.get(); fut_6.get(); fut_7.get(); fut_8.get();
     
     prevent_optimisation(d1);
     prevent_optimisation(d2);
