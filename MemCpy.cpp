@@ -163,8 +163,8 @@ LIMITS_TEST(sqrt, Count) {
   auto p = parameters();
   setup().unit = "operation";
   
-  std::vector<int> a(p.count);
-  std::vector<int> b(p.count);
+  std::vector<double> a(p.count);
+  std::vector<double> b(p.count);
   
   run([&]() {
     for (std::size_t i = 0; i < a.size(); ++i) {
@@ -179,11 +179,11 @@ LIMITS_TEST(complex, Count) {
   auto p = parameters();
   setup().unit = "operation";
   
-  std::vector<int> a(p.count);
-  std::vector<int> b(p.count);
-  std::vector<int> c(p.count);
-  std::vector<int> d1(p.count);
-  std::vector<int> d2(p.count);
+  std::vector<double> a(p.count);
+  std::vector<double> b(p.count);
+  std::vector<double> c(p.count);
+  std::vector<double> d1(p.count);
+  std::vector<double> d2(p.count);
   
   run([&]() {
     for (std::size_t i = 0; i < a.size(); ++i) {
@@ -204,11 +204,11 @@ LIMITS_TEST(quadratic, Count) {
   auto p = parameters();
   setup().unit = "operation";
   
-  std::vector<int> a(p.count);
-  std::vector<int> b(p.count);
-  std::vector<int> c(p.count);
-  std::vector<int> d1(p.count);
-  std::vector<int> d2(p.count);
+  std::vector<double> a(p.count);
+  std::vector<double> b(p.count);
+  std::vector<double> c(p.count);
+  std::vector<double> d1(p.count);
+  std::vector<double> d2(p.count);
   
   run([&]() {
     for (std::size_t i = 0; i < a.size(); ++i) {
@@ -224,16 +224,16 @@ LIMITS_TEST(quadratic, Count) {
   });
 }
 
-LIMITS_TEST(quadratic_threaded_8, Count) {
+LIMITS_TEST(quadratic_threaded_2, Count) {
   
   auto p = parameters();
   setup().unit = "operation";
   
-  std::vector<int> a(p.count);
-  std::vector<int> b(p.count);
-  std::vector<int> c(p.count);
-  std::vector<int> d1(p.count);
-  std::vector<int> d2(p.count);
+  std::vector<double> a(p.count);
+  std::vector<double> b(p.count);
+  std::vector<double> c(p.count);
+  std::vector<double> d1(p.count);
+  std::vector<double> d2(p.count);
   
   auto solve = [&](std::size_t start, std::size_t length) {
     for (std::size_t i = start; i < length; ++i) {

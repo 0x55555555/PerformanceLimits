@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <string>
 #include <vector>
 
 namespace limits
@@ -152,12 +153,12 @@ public:
     }
   
     time_unit = "ns";
-    return time.count();
+    return double(time.count());
   }
   
   std::string rate(const Result &r) const
   {
-    double value = r.parameters.count;
+    double value = double(r.parameters.count);
     std::string time_unit;
     double time = format_time(r.time, time_unit);
   
